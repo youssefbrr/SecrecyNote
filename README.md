@@ -26,8 +26,33 @@ SecrecyNote is a sleek and secure web application for sending private, encrypted
 - Node.js (v14 or later)
 - npm or yarn
 - PostgreSQL database
+- Docker and Docker Compose (optional, for containerized deployment)
+
+### Environment Variables
+
+Before running the application, you need to set up your environment variables:
+
+1. Copy the example environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your configuration:
+
+   ```env
+   # Database connection string
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/securenotes?schema=public"
+
+   # 32-character encryption key for securing notes
+   ENCRYPTION_KEY="your_32_character_secret_key_here"
+   ```
+
+   Note: Make sure to generate a secure 32-character encryption key for production use.
 
 ### Installation
+
+#### Option 1: Local Development
 
 1. Clone the repository:
 
@@ -44,21 +69,13 @@ SecrecyNote is a sleek and secure web application for sending private, encrypted
    yarn install
    ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add the following variables:
-
-   ```
-   DATABASE_URL="your_postgresql_database_url"
-   ENCRYPTION_KEY="your_32_character_secret_key"
-   ```
-
-4. Run database migrations:
+3. Run database migrations:
 
    ```bash
    npx prisma migrate dev
    ```
 
-5. Start the development server:
+4. Start the development server:
 
    ```bash
    npm run dev
@@ -66,7 +83,64 @@ SecrecyNote is a sleek and secure web application for sending private, encrypted
    yarn dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+#### Option 2: Docker Deployment
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/youssefbrr/SecrecyNote.git
+   cd SecrecyNote
+   ```
+
+2. Copy the example environment file and configure it:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Build and run the containers:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will:
+
+   - Start a PostgreSQL database container
+   - Build and start the SecrecyNote application
+   - Make the application available on port 3001
+
+4. Access the application at [http://localhost:3001](http://localhost:3001)
+
+To stop the containers:
+
+```bash
+docker-compose down
+```
+
+To view logs:
+
+```bash
+docker-compose logs -f
+```
+
+### Docker Configuration
+
+The application uses Docker Compose to manage two services:
+
+1. **app**: The Next.js application
+
+   - Builds from the Dockerfile
+   - Runs on port 3001 (host) -> 3000 (container)
+   - Depends on the database service
+
+2. **db**: PostgreSQL database
+   - Uses PostgreSQL 15
+   - Runs on port 5432
+   - Includes health checks
+   - Persists data using Docker volumes
 
 ## Deployment
 
