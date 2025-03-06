@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation"
-import Link from "next/link"
+import { PasswordProtectedNote } from "@/components/password-protected-note"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertTriangle, ShieldCheck } from "lucide-react"
-import { prisma } from "@/lib/prisma"
 import { decrypt } from "@/lib/encryption"
-import { PasswordProtectedNote } from "@/components/password-protected-note"
+import { prisma } from "@/lib/prisma"
+import { AlertTriangle, ShieldCheck } from "lucide-react"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -38,8 +37,8 @@ async function getNote(id: string) {
     }
   }
 
-  // If it's a "view once" note, delete it after retrieving
-  if (note.expirationType === "view") {
+  // If it's a "view once" note and not password protected, delete it after retrieving
+  if (note.expirationType === "view" && !note.passwordProtected) {
     await prisma.note.delete({ where: { id } })
   }
 
@@ -49,7 +48,34 @@ async function getNote(id: string) {
 export default async function ViewNote({ params }: { params: { id: string } }) {
   const note = await getNote(params.id)
 
-  if (!note) notFound()
+  if (!note) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader>
+              <CardTitle>Note Not Found</CardTitle>
+              <CardDescription>This note could not be found or may have been deleted.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+                <p className="mt-4 font-medium text-destructive">This note does not exist.</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Please check the link or contact support if you believe this is an error.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button asChild className="w-full">
+                <Link href="/">Back to Dashboard</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (note === "expired") {
     return (

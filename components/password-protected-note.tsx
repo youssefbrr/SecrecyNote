@@ -2,17 +2,15 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ShieldCheck, Lock, AlertTriangle } from "lucide-react"
+import { AlertTriangle, Lock, ShieldCheck } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
 
 export function PasswordProtectedNote({ note }: { note: any }) {
-  const router = useRouter()
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [decryptedContent, setDecryptedContent] = useState<string | null>(null)
@@ -45,9 +43,6 @@ export function PasswordProtectedNote({ note }: { note: any }) {
       }
 
       setDecryptedContent(data.content)
-      if (note.expirationType === "view") {
-        router.refresh()
-      }
     } catch (error: any) {
       setError(error.message || "Incorrect password. Please try again.")
     } finally {

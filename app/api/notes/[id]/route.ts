@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server"
+import { decrypt, encrypt } from "@/lib/encryption"
 import { prisma } from "@/lib/prisma"
-import { encrypt, decrypt } from "@/lib/encryption"
+import { NextResponse } from "next/server"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const note = await prisma.note.findUnique({
