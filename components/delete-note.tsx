@@ -18,9 +18,10 @@ import { useState } from "react";
 
 interface DeleteNoteProps {
   id: string;
+  className?: string;
 }
 
-export function DeleteNote({ id }: DeleteNoteProps) {
+export function DeleteNote({ id, className }: DeleteNoteProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -47,7 +48,9 @@ export function DeleteNote({ id }: DeleteNoteProps) {
         <Button
           variant='ghost'
           size='icon'
-          className='h-8 w-8 p-0 text-muted-foreground hover:text-destructive'
+          className={`h-8 w-8 p-0 text-muted-foreground hover:text-destructive ${
+            className || ""
+          }`}
         >
           <Trash2 className='h-4 w-4' />
           <span className='sr-only'>Delete note</span>

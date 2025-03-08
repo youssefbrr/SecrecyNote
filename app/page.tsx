@@ -83,27 +83,29 @@ export default async function Home() {
             notes.map((note, index) => (
               <Card
                 key={note.id}
-                className='flex flex-col justify-between border group hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden animate-in slide-in-from-bottom-4 duration-700'
+                className='flex flex-col justify-between border group hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden animate-in slide-in-from-bottom-4 duration-700 h-full'
                 style={{ animationDelay: `${index * 75}ms` }}
               >
                 <div className='absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10'></div>
                 <CardHeader>
                   <div className='flex items-start justify-between'>
-                    <div className='space-y-1.5'>
-                      <CardTitle className='group-hover:text-primary/90 transition-colors duration-300 flex items-center gap-2'>
-                        <span className='truncate'>
+                    <div className='space-y-1.5 min-w-0 flex-1 pr-2'>
+                      <CardTitle className='group-hover:text-primary/90 transition-colors duration-300 flex items-center gap-2 max-w-full overflow-hidden'>
+                        <span className='truncate inline-block max-w-[calc(100%-24px)]'>
                           {note.title || "Untitled Note"}
                         </span>
                         {note.passwordProtected && (
-                          <Shield className='h-4 w-4 text-primary/70' />
+                          <Shield className='h-4 w-4 text-primary/70 flex-shrink-0' />
                         )}
                       </CardTitle>
-                      <CardDescription className='flex items-center gap-2'>
-                        <span className='inline-block w-2 h-2 rounded-full bg-primary/60'></span>
-                        Created: {new Date(note.created).toLocaleString()}
+                      <CardDescription className='flex items-center gap-2 truncate'>
+                        <span className='inline-block w-2 h-2 rounded-full bg-primary/60 flex-shrink-0' />
+                        <span className='truncate'>
+                          Created: {new Date(note.created).toLocaleString()}
+                        </span>
                       </CardDescription>
                     </div>
-                    <DeleteNote id={note.id} />
+                    <DeleteNote id={note.id} className='flex-shrink-0' />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -111,13 +113,15 @@ export default async function Home() {
                     <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/50'>
                       {note.expirationType === "view" ? (
                         <>
-                          <Eye className='h-4 w-4 text-primary/70' />
-                          <span>Expires after viewing</span>
+                          <Eye className='h-4 w-4 text-primary/70 flex-shrink-0' />
+                          <span className='truncate'>
+                            Expires after viewing
+                          </span>
                         </>
                       ) : (
                         <>
-                          <Clock className='h-4 w-4 text-primary/70' />
-                          <span>
+                          <Clock className='h-4 w-4 text-primary/70 flex-shrink-0' />
+                          <span className='truncate'>
                             Expires {formatExpiration(note.expiration)}
                           </span>
                         </>
@@ -125,8 +129,8 @@ export default async function Home() {
                     </div>
                     {note.passwordProtected && (
                       <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/50'>
-                        <Key className='h-4 w-4 text-primary/70' />
-                        <span>Password protected</span>
+                        <Key className='h-4 w-4 text-primary/70 flex-shrink-0' />
+                        <span className='truncate'>Password protected</span>
                       </div>
                     )}
                   </div>
