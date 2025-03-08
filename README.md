@@ -100,47 +100,95 @@ Before running the application, you need to set up your environment variables:
    cp .env.example .env
    ```
 
-3. Build and run the containers:
+3. Choose your deployment mode:
+
+   **Production Mode:**
 
    ```bash
-   docker-compose up -d
+   # Build and run for production
+   npm run docker:prod
    ```
 
-   This will:
+   **Development Mode with Hot Reload:**
+
+   ```bash
+   # Build and run for development with hot reload
+   npm run docker:dev
+   ```
+
+   Both modes will:
 
    - Start a PostgreSQL database container
    - Build and start the SecrecyNote application
    - Make the application available on port 3001
+
+   The key difference is that development mode:
+
+   - Enables hot reload (changes to your code are reflected immediately)
+   - Mounts your local code into the container
+   - Uses a separate database volume for development
 
 4. Access the application at [http://localhost:3001](http://localhost:3001)
 
 To stop the containers:
 
 ```bash
-docker-compose down
+# For production
+npm run docker:prod:down
+
+# For development
+npm run docker:dev:down
 ```
 
 To view logs:
 
 ```bash
+# For production
 docker-compose logs -f
+
+# For development
+docker-compose -f docker-compose.dev.yml logs -f
+```
+
+To rebuild the containers after making changes to Dockerfile or dependencies:
+
+```bash
+# For production
+docker-compose up -d --build
+
+# For development
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
 ### Docker Configuration
 
-The application uses Docker Compose to manage two services:
+The application provides two Docker Compose configurations:
 
-1. **app**: The Next.js application
+1. **Production Mode** (`docker-compose.yml`):
 
-   - Builds from the Dockerfile
-   - Runs on port 3001 (host) -> 3000 (container)
-   - Depends on the database service
+   - Optimized for production use
+   - Multi-stage build for smaller image size
+   - No source code mounting
+   - Standalone Next.js server
 
-2. **db**: PostgreSQL database
-   - Uses PostgreSQL 15
-   - Runs on port 5432
-   - Includes health checks
-   - Persists data using Docker volumes
+2. **Development Mode** (`docker-compose.dev.yml`):
+   - Hot reload enabled
+   - Source code mounted from host
+   - Faster rebuild times
+   - Ideal for development and testing
+
+Each configuration includes:
+
+- **app**: The Next.js application
+
+  - Runs on port 3001 (host) -> 3000 (container)
+  - Depends on the database service
+
+- **db**: PostgreSQL database
+  - Uses PostgreSQL 15
+  - Runs on port 5432
+  - Includes health checks
+  - Persists data using Docker volumes
 
 ## Deployment
 

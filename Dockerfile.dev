@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --legacy-peer-deps
+
+# Install development dependencies
+RUN apk add --no-cache libc6-compat
+
+# Generate Prisma Client
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# We'll mount the source code in docker-compose
+CMD ["npm", "run", "dev"] 

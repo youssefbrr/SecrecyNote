@@ -1,6 +1,6 @@
 {
-  "name": "SecureNote",
-  "short_name": "SecureNote",
+  "name": "SecrecyNote",
+  "short_name": "SecrecyNote",
   "description": "Private & Encrypted Notes",
   "start_url": "/",
   "display": "standalone",
