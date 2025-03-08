@@ -1,5 +1,6 @@
 "use client";
 
+import { useNoteRefresh } from "@/components/providers/note-refresh-provider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +26,7 @@ import { useState } from "react";
 
 export default function CreateNote() {
   const router = useRouter();
+  const { refreshNotes } = useNoteRefresh();
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [expirationType, setExpirationType] = useState("view");
@@ -81,6 +83,7 @@ export default function CreateNote() {
   };
 
   const createNewNote = () => {
+    refreshNotes();
     router.push("/");
   };
 

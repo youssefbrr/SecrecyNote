@@ -1,4 +1,5 @@
 import { DeleteNote } from "@/components/delete-note";
+import { NotesRefreshHandler } from "@/components/notes-refresh-handler";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { Clock, Eye, Key, PlusCircle } from "lucide-react";
+import { Clock, Eye, Key, PlusCircle, Shield } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -29,11 +30,32 @@ async function getNotes() {
   return notes;
 }
 
+function formatExpiration(expiration: string | null): string {
+  if (!expiration) return "soon";
+
+  switch (expiration) {
+    case "5 minutes":
+      return "in 5 minutes";
+    case "1 hour":
+      return "in 1 hour";
+    case "1 day":
+      return "in 1 day";
+    case "7 days":
+      return "in 7 days";
+    case "30 days":
+      return "in 30 days";
+    default:
+      return `in ${expiration}`;
+  }
+}
+
 export default async function Home() {
   const notes = await getNotes();
 
   return (
     <div className='flex min-h-screen flex-col items-center pt-8 px-4 pb-16 md:pt-16 md:px-8 md:pb-24 animate-in fade-in duration-500'>
+      <NotesRefreshHandler />
+
       <div className='w-full max-w-6xl space-y-10'>
         <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4'>
           <div>
@@ -64,54 +86,75 @@ export default async function Home() {
                 className='flex flex-col justify-between border group hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden animate-in slide-in-from-bottom-4 duration-700'
                 style={{ animationDelay: `${index * 75}ms` }}
               >
-                <div className='absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                <div className='absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10'></div>
                 <CardHeader>
-                  <CardTitle className='flex justify-between items-center group-hover:text-primary/90 transition-colors duration-300'>
-                    <span className='truncate'>
-                      {note.title || "Untitled Note"}
-                    </span>
+                  <div className='flex items-start justify-between'>
+                    <div className='space-y-1.5'>
+                      <CardTitle className='group-hover:text-primary/90 transition-colors duration-300 flex items-center gap-2'>
+                        <span className='truncate'>
+                          {note.title || "Untitled Note"}
+                        </span>
+                        {note.passwordProtected && (
+                          <Shield className='h-4 w-4 text-primary/70' />
+                        )}
+                      </CardTitle>
+                      <CardDescription className='flex items-center gap-2'>
+                        <span className='inline-block w-2 h-2 rounded-full bg-primary/60'></span>
+                        Created: {new Date(note.created).toLocaleString()}
+                      </CardDescription>
+                    </div>
                     <DeleteNote id={note.id} />
-                  </CardTitle>
-                  <CardDescription className='flex items-center gap-2'>
-                    <span className='inline-block w-2 h-2 rounded-full bg-primary/60'></span>
-                    Created: {new Date(note.created).toLocaleString()}
-                  </CardDescription>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className='flex flex-col space-y-3 text-sm'>
-                    <div className='flex items-center gap-2 p-2 rounded-lg bg-muted/50'>
+                    <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/50'>
                       {note.expirationType === "view" ? (
-                        <Eye className='h-4 w-4 text-primary/70' />
+                        <>
+                          <Eye className='h-4 w-4 text-primary/70' />
+                          <span>Expires after viewing</span>
+                        </>
                       ) : (
-                        <Clock className='h-4 w-4 text-primary/70' />
+                        <>
+                          <Clock className='h-4 w-4 text-primary/70' />
+                          <span>
+                            Expires {formatExpiration(note.expiration)}
+                          </span>
+                        </>
                       )}
-                      <span>
-                        {note.expirationType === "view"
-                          ? "Expires after viewing"
-                          : `Expires ${note.expiration}`}
-                      </span>
                     </div>
                     {note.passwordProtected && (
-                      <div className='flex items-center gap-2 p-2 rounded-lg bg-muted/50'>
+                      <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/50'>
                         <Key className='h-4 w-4 text-primary/70' />
                         <span>Password protected</span>
                       </div>
                     )}
                   </div>
                 </CardContent>
-                <CardFooter className='flex justify-between pt-2'>
+                <CardFooter className='flex justify-between gap-2 pt-4'>
                   <Button
                     asChild
                     variant='outline'
-                    className='w-[48%] transition-all duration-300 hover:bg-muted'
+                    className='flex-1 transition-all duration-300 hover:bg-muted'
                   >
-                    <Link href={`/view/${note.id}`}>View</Link>
+                    <Link
+                      href={`/view/${note.id}`}
+                      className='flex items-center justify-center gap-2'
+                    >
+                      <Eye className='w-4 h-4' />
+                      <span>View</span>
+                    </Link>
                   </Button>
                   <Button
                     asChild
-                    className='w-[48%] transition-all duration-300 hover:scale-105'
+                    className='flex-1 transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary/90 to-primary/80'
                   >
-                    <Link href={`/edit/${note.id}`}>Edit</Link>
+                    <Link
+                      href={`/edit/${note.id}`}
+                      className='flex items-center justify-center gap-2'
+                    >
+                      <span>Edit</span>
+                    </Link>
                   </Button>
                 </CardFooter>
               </Card>
@@ -133,7 +176,7 @@ export default async function Home() {
                 <Button
                   asChild
                   size='lg'
-                  className='px-8 py-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300'
+                  className='px-8 py-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary'
                 >
                   <Link href='/create' className='flex items-center gap-2'>
                     <span>Create Your First Note</span>
