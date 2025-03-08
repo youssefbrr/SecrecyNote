@@ -3,9 +3,8 @@
 import { createContext, useContext, useState } from "react";
 
 type NoteRefreshContextType = {
-  shouldRefresh: boolean;
-  setShouldRefresh: (value: boolean) => void;
   refreshNotes: () => void;
+  refreshFlag: number;
 };
 
 const NoteRefreshContext = createContext<NoteRefreshContextType | undefined>(
@@ -17,16 +16,14 @@ export function NoteRefreshProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(0);
 
   const refreshNotes = () => {
-    setShouldRefresh(true);
+    setRefreshFlag((prev) => prev + 1);
   };
 
   return (
-    <NoteRefreshContext.Provider
-      value={{ shouldRefresh, setShouldRefresh, refreshNotes }}
-    >
+    <NoteRefreshContext.Provider value={{ refreshNotes, refreshFlag }}>
       {children}
     </NoteRefreshContext.Provider>
   );

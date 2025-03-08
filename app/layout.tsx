@@ -1,11 +1,14 @@
+import "@/app/globals.css";
+import { UserProfile } from "@/components/auth/user-profile";
+import { ModeToggle } from "@/components/mode-toggle";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { NoteRefreshProvider } from "@/components/providers/note-refresh-provider";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/ui/header";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { cn } from "@/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import type React from "react";
-import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,47 +62,67 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <body
-        className={`${inter.className} min-h-screen bg-background antialiased`}
+        className={cn(
+          "min-h-screen bg-background antialiased selection:bg-primary/10 selection:text-primary",
+          inter.className
+        )}
       >
         <ThemeProvider
           attribute='class'
           defaultTheme='system'
           enableSystem
           disableTransitionOnChange
-          storageKey='secure-note-theme'
         >
-          <NoteRefreshProvider>
-            <div className='relative flex min-h-screen flex-col bg-gradient-to-b from-background to-background/95'>
-              <Header />
-              <main className='flex-1 w-full'>{children}</main>
-              <footer className='py-6 md:py-0 md:h-16 border-t bg-background/50 backdrop-blur-sm'>
-                <div className='container h-full flex flex-col md:flex-row items-center justify-center md:justify-between text-sm'>
-                  <p className='text-muted-foreground'>
-                    &copy; {new Date().getFullYear()} SecrecyNote. All rights
-                    reserved.
-                  </p>
-                  <div className='flex items-center space-x-4 mt-2 md:mt-0'>
-                    <Link
-                      href='/privacy'
-                      className='text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      Privacy
-                    </Link>
-                    <Link
-                      href='/terms'
-                      className='text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      Terms
-                    </Link>
+          <AuthProvider>
+            <NoteRefreshProvider>
+              <div className='relative flex min-h-screen flex-col'>
+                <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+                  <div className='container flex h-14 items-center'>
+                    <div className='mr-4 flex'>
+                      <Link
+                        href='/'
+                        className='mr-2 flex items-center space-x-2'
+                      >
+                        <span className='font-bold text-lg bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent'>
+                          Secure Notes
+                        </span>
+                      </Link>
+                    </div>
+                    <div className='flex-1'></div>
+                    <div className='flex items-center space-x-2'>
+                      <UserProfile />
+                      <ModeToggle />
+                    </div>
                   </div>
-                </div>
-              </footer>
-            </div>
-          </NoteRefreshProvider>
+                </header>
+                <main className='flex-1'>{children}</main>
+                <footer className='border-t py-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+                  <div className='container flex flex-col items-center justify-between gap-2 text-sm text-muted-foreground md:flex-row'>
+                    <p>
+                      © {new Date().getFullYear()} Secure Notes. All rights
+                      reserved.
+                    </p>
+                    <div className='flex items-center gap-4'>
+                      <Link
+                        href='/privacy'
+                        className='hover:text-primary transition-colors'
+                      >
+                        Privacy
+                      </Link>
+                      <Link
+                        href='/terms'
+                        className='hover:text-primary transition-colors'
+                      >
+                        Terms
+                      </Link>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+            </NoteRefreshProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-
-import "./globals.css";
