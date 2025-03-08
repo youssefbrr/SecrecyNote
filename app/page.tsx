@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatDate, formatRelativeTime } from "@/lib/date-utils";
 import { prisma } from "@/lib/prisma";
 import { Clock, Eye, Key, PlusCircle, Shield } from "lucide-react";
 import Link from "next/link";
@@ -100,8 +101,11 @@ export default async function Home() {
                       </CardTitle>
                       <CardDescription className='flex items-center gap-2 truncate'>
                         <span className='inline-block w-2 h-2 rounded-full bg-primary/60 flex-shrink-0' />
-                        <span className='truncate'>
-                          Created: {new Date(note.created).toLocaleString()}
+                        <span
+                          className='truncate'
+                          title={formatDate(note.created)}
+                        >
+                          Created: {formatRelativeTime(note.created)}
                         </span>
                       </CardDescription>
                     </div>
