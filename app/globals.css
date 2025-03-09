@@ -57,3 +57,65 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .hover-lift {
+    @apply transition-transform duration-300;
+  }
+
+  .hover-lift:hover {
+    @apply transform -translate-y-1;
+  }
+
+  .hover-lift-sm {
+    @apply transition-transform duration-300;
+  }
+
+  .hover-lift-sm:hover {
+    @apply transform -translate-y-0.5;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-scale {
+    animation: scale 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  }
+
+  @keyframes scale {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
