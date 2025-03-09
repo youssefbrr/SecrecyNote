@@ -35,8 +35,8 @@ export function Header() {
                 My Notes
               </Link>
             </div>
-            <ThemeToggle />
             <UserProfile />
+            <ThemeToggle />
           </nav>
         </div>
       </div>

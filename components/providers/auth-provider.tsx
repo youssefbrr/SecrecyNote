@@ -25,6 +25,11 @@ type AuthContextType = {
     name?: string
   ) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateProfile: (name: string) => Promise<boolean>;
+  updatePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -119,6 +124,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (name: string) => {
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      return true;
+    } catch (error) {
+      console.error("Profile update error:", error);
+      return false;
+    }
+  };
+
+  const updatePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    try {
+      const response = await fetch("/api/user/password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("Password update error:", error);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -128,6 +176,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateProfile,
+        updatePassword,
       }}
     >
       {children}
