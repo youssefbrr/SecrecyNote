@@ -1,9 +1,37 @@
+import { getCurrentUser } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const user = await getCurrentUser();
+
+  // If user is authenticated, show their notes
+  if (user) {
+    const notes = await prisma.note.findMany({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        id: true,
+        title: true,
+        expirationType: true,
+        expiration: true,
+        passwordProtected: true,
+        created: true,
+        updated: true,
+      },
+      orderBy: { created: "desc" },
+    });
+    return NextResponse.json(notes);
+  }
+
+  // For guest users, only show guest notes
   const notes = await prisma.note.findMany({
+    where: {
+      isGuest: true,
+      userId: null,
+    },
     select: {
       id: true,
       title: true,
@@ -13,13 +41,15 @@ export async function GET() {
       created: true,
       updated: true,
     },
+    orderBy: { created: "desc" },
   });
   return NextResponse.json(notes);
 }
 
 export async function POST(request: Request) {
   const data = await request.json();
-  const { title, content, expirationType, expiration, password } = data;
+  const { title, content, expirationType, expiration, password, isGuest } =
+    data;
 
   // Validate expiration format if it's time-based
   if (expirationType === "time" && expiration) {
@@ -44,6 +74,9 @@ export async function POST(request: Request) {
   const encryptedContent = await encrypt(content);
   const encryptedPassword = password ? await encrypt(password) : null;
 
+  // Check if user is authenticated
+  const user = await getCurrentUser();
+
   const note = await prisma.note.create({
     data: {
       title,
@@ -52,6 +85,8 @@ export async function POST(request: Request) {
       expiration,
       passwordProtected: !!password,
       password: encryptedPassword,
+      isGuest: isGuest || !user,
+      userId: user?.id || null,
     },
   });
 

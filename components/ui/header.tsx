@@ -1,3 +1,4 @@
+import { UserProfile } from "@/components/auth/user-profile";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 
@@ -34,6 +35,7 @@ export function Header() {
                 My Notes
               </Link>
             </div>
+            <UserProfile />
             <ThemeToggle />
           </nav>
         </div>

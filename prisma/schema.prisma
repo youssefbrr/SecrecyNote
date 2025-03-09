@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
+  notes     Note[]
+}
+
 model Note {
   id                 String   @id @default(cuid())
   title              String?
@@ -17,5 +27,8 @@ model Note {
   password           String?
   created            DateTime @default(now())
   updated            DateTime @updatedAt
+  isGuest            Boolean  @default(false)
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 

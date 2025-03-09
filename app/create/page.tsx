@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/providers/auth-provider";
 import { useNoteRefresh } from "@/components/providers/note-refresh-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,22 +22,32 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CreateNote() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isGuest = searchParams.get("guest") === "true";
   const { refreshNotes } = useNoteRefresh();
+  const { isAuthenticated, isLoading } = useAuth();
+
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [expirationType, setExpirationType] = useState("view");
   const [expiration, setExpiration] = useState("1 hour");
-  const [usePassword, setUsePassword] = useState(false);
+  const [passwordProtected, setPasswordProtected] = useState(false);
   const [password, setPassword] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [noteLink, setNoteLink] = useState("");
   const [copied, setCopied] = useState(false);
-  const [passwordProtected, setPasswordProtected] = useState(false);
+
+  useEffect(() => {
+    // If not guest mode and not authenticated, redirect to home
+    if (!isGuest && !isLoading && !isAuthenticated) {
+      router.push("/");
+    }
+  }, [isGuest, isAuthenticated, isLoading, router]);
 
   const handleExpirationTypeChange = (type: string) => {
     setExpirationType(type);
@@ -62,6 +73,7 @@ export default function CreateNote() {
           expirationType,
           expiration: expirationType === "time" ? expiration : null,
           password: passwordProtected ? password : null,
+          isGuest,
         }),
       });
 
@@ -84,8 +96,20 @@ export default function CreateNote() {
 
   const createNewNote = () => {
     refreshNotes();
-    router.push("/");
+    if (isGuest) {
+      router.push("/");
+    } else {
+      router.push("/notes");
+    }
   };
+
+  if (isLoading && !isGuest) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
+      </div>
+    );
+  }
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center p-4 md:p-12 animate-in fade-in duration-500'>
@@ -95,6 +119,11 @@ export default function CreateNote() {
           <CardHeader className='space-y-1'>
             <CardTitle className='text-2xl font-bold'>
               Create a Secure Note
+              {isGuest && (
+                <span className='ml-2 text-sm text-muted-foreground'>
+                  (Guest)
+                </span>
+              )}
             </CardTitle>
             <CardDescription className='text-muted-foreground'>
               Your note will be encrypted and only accessible via the generated
@@ -252,44 +281,37 @@ export default function CreateNote() {
               </>
             ) : (
               <div className='space-y-6 animate-in fade-in-50 duration-300'>
-                <div className='rounded-md bg-primary/10 p-4 border border-primary/30'>
-                  <h3 className='font-medium mb-2 text-primary'>
-                    Note Created Successfully!
+                <div className='rounded-lg border bg-muted/50 p-4'>
+                  <h3 className='font-medium mb-2'>
+                    Your note has been created!
                   </h3>
                   <p className='text-sm text-muted-foreground mb-4'>
-                    Share this link with anyone you want to access the note:
+                    Share this link with anyone you want to view the note. The
+                    note will be deleted after viewing.
                   </p>
-                  <div className='flex items-center gap-2 bg-background rounded-md p-2 border border-border'>
+                  <div className='flex items-center gap-2'>
                     <Input
                       value={noteLink}
                       readOnly
-                      className='border-0 focus-visible:ring-0 focus-visible:ring-offset-0'
+                      onClick={(e) => e.currentTarget.select()}
+                      className='font-mono text-xs bg-background'
                     />
                     <Button
                       onClick={copyToClipboard}
-                      size='sm'
                       variant='outline'
-                      className='shrink-0 h-8 border-primary/20 hover:bg-primary/5'
+                      className='shrink-0'
                     >
                       {copied ? "Copied!" : "Copy"}
                     </Button>
                   </div>
                 </div>
 
-                <div className='text-center space-y-2'>
-                  <p className='text-sm text-muted-foreground'>
-                    {expirationType === "view"
-                      ? "The note will be deleted after it's viewed."
-                      : `The note will expire after ${expiration}.`}
-                  </p>
-                  <Button
-                    onClick={createNewNote}
-                    variant='outline'
-                    className='mt-2 w-full border-primary/20 hover:bg-primary/5 transition-all duration-300'
-                  >
-                    Create Another Note
-                  </Button>
-                </div>
+                <Button
+                  onClick={createNewNote}
+                  className='w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all duration-300'
+                >
+                  {isGuest ? "Back to Home" : "Back to Notes"}
+                </Button>
               </div>
             )}
           </CardContent>

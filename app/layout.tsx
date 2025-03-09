@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { NoteRefreshProvider } from "@/components/providers/note-refresh-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/ui/header";
@@ -68,38 +69,38 @@ export default function RootLayout({
           disableTransitionOnChange
           storageKey='secure-note-theme'
         >
-          <NoteRefreshProvider>
-            <div className='relative flex min-h-screen flex-col bg-gradient-to-b from-background to-background/95'>
-              <Header />
-              <main className='flex-1 w-full'>{children}</main>
-              <footer className='py-6 md:py-0 md:h-16 border-t bg-background/50 backdrop-blur-sm'>
-                <div className='container h-full flex flex-col md:flex-row items-center justify-center md:justify-between text-sm'>
-                  <p className='text-muted-foreground'>
-                    &copy; {new Date().getFullYear()} SecrecyNote. All rights
-                    reserved.
-                  </p>
-                  <div className='flex items-center space-x-4 mt-2 md:mt-0'>
-                    <Link
-                      href='/privacy'
-                      className='text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      Privacy
-                    </Link>
-                    <Link
-                      href='/terms'
-                      className='text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      Terms
-                    </Link>
+          <AuthProvider>
+            <NoteRefreshProvider>
+              <div className='relative flex min-h-screen flex-col bg-gradient-to-b from-background to-background/95'>
+                <Header />
+                <main className='flex-1 w-full'>{children}</main>
+                <footer className='py-6 md:py-0 md:h-16 border-t bg-background/50 backdrop-blur-sm'>
+                  <div className='container h-full flex flex-col md:flex-row items-center justify-center md:justify-between text-sm'>
+                    <p className='text-muted-foreground'>
+                      &copy; {new Date().getFullYear()} SecrecyNote. All rights
+                      reserved.
+                    </p>
+                    <div className='flex items-center space-x-4 mt-2 md:mt-0'>
+                      <Link
+                        href='/privacy'
+                        className='text-muted-foreground hover:text-foreground transition-colors'
+                      >
+                        Privacy
+                      </Link>
+                      <Link
+                        href='/terms'
+                        className='text-muted-foreground hover:text-foreground transition-colors'
+                      >
+                        Terms
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </footer>
-            </div>
-          </NoteRefreshProvider>
+                </footer>
+              </div>
+            </NoteRefreshProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-
-import "./globals.css";
