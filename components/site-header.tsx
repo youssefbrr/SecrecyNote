@@ -59,16 +59,16 @@ export function SiteHeader() {
   };
 
   return (
-    <header className='w-full py-4 px-4 md:px-8 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50 animate-in fade-in-50 duration-500'>
+    <header className='w-full py-4 px-4 md:px-8 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50 animate-in fade-in-50 duration-500 shadow-sm'>
       <div className='max-w-6xl mx-auto flex justify-between items-center'>
-        <Link href='/' className='flex items-center gap-2 group'>
+        <Link href='/' className='flex items-center gap-2 group hover-lift-sm'>
           <div className='relative'>
-            <div className='absolute -inset-1 rounded-full blur-sm bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-            <div className='h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center relative'>
-              <Lock className='h-5 w-5 text-primary' />
+            <div className='absolute -inset-1 rounded-full blur-sm bg-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+            <div className='h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center relative transition-colors duration-300 group-hover:bg-primary/20'>
+              <Lock className='h-5 w-5 text-primary animate-pulse-subtle' />
             </div>
           </div>
-          <h1 className='text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent'>
+          <h1 className='text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent transition-all duration-300'>
             SecrecyNote
           </h1>
         </Link>
@@ -81,7 +81,7 @@ export function SiteHeader() {
                   asChild
                   variant='default'
                   size='sm'
-                  className='bg-primary/90 hover:bg-primary border border-primary/20 mr-2'
+                  className='bg-primary/90 hover:bg-primary border border-primary/20 mr-2 hover-lift-sm'
                 >
                   <Link href='/notes'>
                     <FileText className='h-4 w-4 mr-1.5' />
@@ -94,17 +94,21 @@ export function SiteHeader() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant='ghost'
-                    className='relative h-9 w-9 rounded-full'
+                    className='relative h-9 w-9 rounded-full hover:bg-primary/10 transition-colors duration-300'
                     size='icon'
                   >
-                    <Avatar className='h-9 w-9 border border-border/40'>
+                    <Avatar className='h-9 w-9 border border-border/40 transition-all duration-300 hover:border-primary/50'>
                       <AvatarFallback className='bg-primary/10 text-primary font-medium'>
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className='w-56' align='end' forceMount>
+                <DropdownMenuContent
+                  className='w-56 animate-scale border border-primary/20'
+                  align='end'
+                  forceMount
+                >
                   <DropdownMenuLabel>
                     <div className='flex flex-col space-y-1'>
                       <p className='text-sm font-medium leading-none'>
@@ -120,7 +124,7 @@ export function SiteHeader() {
                     <DropdownMenuItem asChild>
                       <Link
                         href='/notes'
-                        className='cursor-pointer w-full flex items-center'
+                        className='cursor-pointer w-full flex items-center transition-colors hover:bg-primary/5'
                       >
                         <FileText className='mr-2 h-4 w-4' />
                         <span>My Notes</span>
@@ -130,7 +134,7 @@ export function SiteHeader() {
                     <DropdownMenuItem asChild>
                       <Link
                         href='/account'
-                        className='cursor-pointer w-full flex items-center'
+                        className='cursor-pointer w-full flex items-center transition-colors hover:bg-primary/5'
                       >
                         <UserCircle className='mr-2 h-4 w-4' />
                         <span>Account</span>
@@ -143,7 +147,7 @@ export function SiteHeader() {
                       onClick={() =>
                         setTheme(theme === "dark" ? "light" : "dark")
                       }
-                      className='cursor-pointer'
+                      className='cursor-pointer transition-colors hover:bg-primary/5'
                     >
                       {theme === "dark" ? (
                         <>
@@ -161,7 +165,7 @@ export function SiteHeader() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className='cursor-pointer text-destructive focus:text-destructive'
+                    className='cursor-pointer text-destructive focus:text-destructive transition-colors'
                   >
                     <LogOut className='mr-2 h-4 w-4' />
                     <span>Log Out</span>
@@ -175,7 +179,7 @@ export function SiteHeader() {
                 variant='outline'
                 size='sm'
                 onClick={() => setShowAuthOptions(true)}
-                className='border-primary/20 hover:bg-primary/5'
+                className='border-primary/20 hover:bg-primary/5 hover-lift-sm'
               >
                 <User className='h-4 w-4 mr-1.5' />
                 <span>Login</span>
@@ -184,7 +188,7 @@ export function SiteHeader() {
                 asChild
                 variant='default'
                 size='sm'
-                className='bg-primary/90 hover:bg-primary border border-primary/20'
+                className='bg-primary/90 hover:bg-primary border border-primary/20 hover-lift-sm'
               >
                 <Link href='/create?guest=true'>
                   <PlusCircle className='h-4 w-4 mr-1.5' />

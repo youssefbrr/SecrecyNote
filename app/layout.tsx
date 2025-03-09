@@ -66,14 +66,16 @@ export default function RootLayout({
           attribute='class'
           defaultTheme='system'
           enableSystem
-          disableTransitionOnChange
           storageKey='secure-note-theme'
         >
           <AuthProvider>
             <NoteRefreshProvider>
               <div className='relative flex min-h-screen flex-col bg-gradient-to-b from-background to-background/95'>
+                <div className='fixed inset-0 bg-background/50 backdrop-blur-[100px] -z-10'></div>
                 <SiteHeader />
-                <main className='flex-1 w-full'>{children}</main>
+                <main className='flex-1 w-full animate-fade-in'>
+                  {children}
+                </main>
                 <SiteFooter />
               </div>
             </NoteRefreshProvider>
