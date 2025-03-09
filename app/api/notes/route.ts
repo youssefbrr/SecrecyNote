@@ -1,14 +1,17 @@
 import { getCurrentUser } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
+import { isNoteExpired } from "@/lib/note-utils";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   const user = await getCurrentUser();
 
+  let notes = [];
+
   // If user is authenticated, show their notes
   if (user) {
-    const notes = await prisma.note.findMany({
+    notes = await prisma.note.findMany({
       where: {
         userId: user.id,
       },
@@ -23,27 +26,33 @@ export async function GET() {
       },
       orderBy: { created: "desc" },
     });
-    return NextResponse.json(notes);
+  } else {
+    // For guest users, only show guest notes
+    notes = await prisma.note.findMany({
+      where: {
+        isGuest: true,
+        userId: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        expirationType: true,
+        expiration: true,
+        passwordProtected: true,
+        created: true,
+        updated: true,
+      },
+      orderBy: { created: "desc" },
+    });
   }
 
-  // For guest users, only show guest notes
-  const notes = await prisma.note.findMany({
-    where: {
-      isGuest: true,
-      userId: null,
-    },
-    select: {
-      id: true,
-      title: true,
-      expirationType: true,
-      expiration: true,
-      passwordProtected: true,
-      created: true,
-      updated: true,
-    },
-    orderBy: { created: "desc" },
-  });
-  return NextResponse.json(notes);
+  // Add an isExpired flag to each note
+  const notesWithExpirationFlag = notes.map((note) => ({
+    ...note,
+    isExpired: isNoteExpired(note),
+  }));
+
+  return NextResponse.json(notesWithExpirationFlag);
 }
 
 export async function POST(request: Request) {
