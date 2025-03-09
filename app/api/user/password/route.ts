@@ -12,7 +12,7 @@ export async function PUT(request: Request) {
 
     const { currentPassword, newPassword } = await request.json();
 
-    // Validate input
+    // Validate input - check if fields exist
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
         { error: "Both current and new password are required" },
@@ -20,9 +20,33 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Additional password validation
     if (newPassword.length < 8) {
       return NextResponse.json(
         { error: "New password must be at least 8 characters long" },
+        { status: 400 }
+      );
+    }
+
+    if (newPassword === currentPassword) {
+      return NextResponse.json(
+        { error: "New password must be different from current password" },
+        { status: 400 }
+      );
+    }
+
+    // Password complexity check (optional but recommended)
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+    if (!(hasUpperCase && hasLowerCase && (hasNumbers || hasSpecialChar))) {
+      return NextResponse.json(
+        {
+          error:
+            "Password must contain uppercase and lowercase letters, and at least one number or special character",
+        },
         { status: 400 }
       );
     }
@@ -65,7 +89,10 @@ export async function PUT(request: Request) {
       },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Password updated successfully",
+    });
   } catch (error) {
     console.error("Password update error:", error);
     return NextResponse.json(

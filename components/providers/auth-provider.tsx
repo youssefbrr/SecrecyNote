@@ -25,11 +25,19 @@ type AuthContextType = {
     name?: string
   ) => Promise<boolean>;
   logout: () => Promise<void>;
-  updateProfile: (name: string) => Promise<boolean>;
+  updateProfile: (name: string) => Promise<{
+    success: boolean;
+    data?: User;
+    error?: string;
+  }>;
   updatePassword: (
     currentPassword: string,
     newPassword: string
-  ) => Promise<boolean>;
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    status?: number;
+  }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,28 +47,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await fetch("/api/auth/session");
-        const data = await response.json();
+  const checkAuthStatus = async () => {
+    try {
+      console.log("Checking auth status...");
+      const response = await fetch("/api/auth/session");
+      const data = await response.json();
+      console.log("Auth status response:", data);
 
-        if (data.authenticated && data.user) {
-          setUser(data.user);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error);
+      if (data.authenticated && data.user) {
+        console.log("User is authenticated, setting user state:", data.user);
+        setUser(data.user);
+        setIsAuthenticated(true);
+      } else {
+        console.log("User is not authenticated");
         setUser(null);
         setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
+      setIsLoading(false);
+      return true; // Return success
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+      setUser(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      throw error; // Propagate the error
+    }
+  };
+
+  useEffect(() => {
     checkAuthStatus();
   }, []);
 
@@ -126,6 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (name: string) => {
     try {
+      console.log("Updating profile with name:", name);
+
       const response = await fetch("/api/user/profile", {
         method: "PUT",
         headers: {
@@ -134,16 +151,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ name }),
       });
 
+      const data = await response.json();
+      console.log("Profile update response:", data);
+
       if (!response.ok) {
-        return false;
+        console.error("Profile update failed:", data.error);
+        return {
+          success: false,
+          error: data.error || "Failed to update profile",
+        };
       }
 
-      const updatedUser = await response.json();
-      setUser(updatedUser);
-      return true;
+      console.log("Updating user state with new name:", data.name);
+
+      // First, directly update the user state for immediate feedback
+      setUser((prev) => {
+        if (!prev) return data;
+        const updatedUser = {
+          ...prev,
+          name: data.name,
+        };
+        console.log("Previous user state:", prev);
+        console.log("Updated user state:", updatedUser);
+        return updatedUser;
+      });
+
+      // Then, refresh the session to make sure all components have the latest data
+      // This is important to ensure consistency between the client state and server state
+      try {
+        console.log("Refreshing session data...");
+        await checkAuthStatus();
+        console.log("Session refresh complete");
+      } catch (refreshError) {
+        console.error("Error refreshing session:", refreshError);
+        // Even if refresh fails, we already updated the local state
+      }
+
+      return { success: true, data };
     } catch (error) {
       console.error("Profile update error:", error);
-      return false;
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      };
     }
   };
 
@@ -160,10 +213,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
-      return response.ok;
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || "Failed to update password",
+          status: response.status,
+        };
+      }
+
+      return { success: true };
     } catch (error) {
       console.error("Password update error:", error);
-      return false;
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      };
     }
   };
 

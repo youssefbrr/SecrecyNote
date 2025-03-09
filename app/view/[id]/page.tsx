@@ -131,7 +131,7 @@ export default function ViewNote({ params }: { params: { id: string } }) {
         <Card className='w-full max-w-md'>
           <CardContent className='pt-6'>
             <div className='flex justify-center'>
-              <Loader2 className='h-8 w-8 animate-spin text-primary' />
+              <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
             </div>
           </CardContent>
         </Card>
