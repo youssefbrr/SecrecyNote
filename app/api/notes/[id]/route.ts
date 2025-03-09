@@ -1,4 +1,5 @@
 import { decrypt, encrypt } from "@/lib/encryption";
+import { isNoteExpired } from "@/lib/note-utils";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -18,71 +19,11 @@ export async function GET(
     }
 
     // Check if the note has expired
-    if (note.expirationType === "time" && note.expiration) {
-      try {
-        const expirationDate = new Date(note.created);
-
-        // Handle UI-friendly formats by converting them to the correct format for calculation
-        let expirationValue = note.expiration;
-
-        // Convert UI-friendly formats to calculation format (e.g., "1 hour" to "1h")
-        if (note.expiration === "5 minutes") {
-          expirationValue = "5m";
-        } else if (note.expiration === "1 hour") {
-          expirationValue = "1h";
-        } else if (note.expiration === "1 day") {
-          expirationValue = "1d";
-        } else if (note.expiration === "7 days") {
-          expirationValue = "7d";
-        } else if (note.expiration === "30 days") {
-          expirationValue = "30d";
-        }
-
-        const matches = expirationValue.match(/(\d+)([mhd])/);
-
-        if (!matches) {
-          return NextResponse.json(
-            { error: "Invalid expiration format" },
-            { status: 400 }
-          );
-        }
-
-        const amount = parseInt(matches[1], 10);
-        const unit = matches[2];
-
-        switch (unit) {
-          case "m":
-            expirationDate.setMinutes(expirationDate.getMinutes() + amount);
-            break;
-          case "h":
-            expirationDate.setHours(expirationDate.getHours() + amount);
-            break;
-          case "d":
-            expirationDate.setDate(expirationDate.getDate() + amount);
-            break;
-          default:
-            return NextResponse.json(
-              { error: "Invalid time unit" },
-              { status: 400 }
-            );
-        }
-
-        const now = new Date();
-        if (now > expirationDate) {
-          // Delete expired note
-          await prisma.note.delete({ where: { id: params.id } });
-          return NextResponse.json(
-            { error: "Note has expired" },
-            { status: 410 }
-          );
-        }
-      } catch (error) {
-        console.error("Error processing expiration:", error);
-        return NextResponse.json(
-          { error: "Error processing note expiration" },
-          { status: 500 }
-        );
-      }
+    if (isNoteExpired(note)) {
+      return NextResponse.json(
+        { error: "Note has expired and cannot be viewed" },
+        { status: 410 }
+      );
     }
 
     let response;
@@ -150,6 +91,14 @@ export async function POST(
     );
   }
 
+  // Check if the note has expired
+  if (isNoteExpired(note)) {
+    return NextResponse.json(
+      { error: "Note has expired and cannot be accessed" },
+      { status: 410 }
+    );
+  }
+
   const { password } = await request.json();
 
   if (!password) {
@@ -201,6 +150,14 @@ export async function PUT(
 
   if (!existingNote) {
     return NextResponse.json({ error: "Note not found" }, { status: 404 });
+  }
+
+  // Check if the note has expired
+  if (isNoteExpired(existingNote)) {
+    return NextResponse.json(
+      { error: "Note has expired and cannot be edited" },
+      { status: 410 }
+    );
   }
 
   const data = await request.json();

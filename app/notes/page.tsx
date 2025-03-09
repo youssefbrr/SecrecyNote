@@ -11,11 +11,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDate, formatRelativeTime } from "@/lib/date-utils";
-import { Clock, Eye, Key, PlusCircle, Shield } from "lucide-react";
+import {
+  ArrowUpDown,
+  Clock,
+  Eye,
+  Filter,
+  Key,
+  PlusCircle,
+  Search,
+  Shield,
+  Trash2,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Note = {
   id: string;
@@ -25,7 +43,66 @@ type Note = {
   passwordProtected: boolean;
   created: string;
   updated: string;
+  isExpired?: boolean;
 };
+
+// Helper function to check if a note is expired
+function isNoteExpired(note: Note): boolean {
+  if (note.isExpired !== undefined) {
+    return note.isExpired;
+  }
+
+  if (note.expirationType === "never") return false;
+
+  if (note.expirationType === "time" && note.expiration) {
+    const expirationDate = new Date(note.created);
+
+    // Convert UI-friendly formats to calculation format
+    let expirationValue = note.expiration;
+
+    if (note.expiration === "5 minutes") {
+      expirationValue = "5m";
+    } else if (note.expiration === "1 hour") {
+      expirationValue = "1h";
+    } else if (note.expiration === "1 day") {
+      expirationValue = "1d";
+    } else if (note.expiration === "7 days") {
+      expirationValue = "7d";
+    } else if (note.expiration === "30 days") {
+      expirationValue = "30d";
+    }
+
+    const matches = expirationValue.match(/(\d+)([mhd])/);
+
+    if (!matches) {
+      return false;
+    }
+
+    const amount = parseInt(matches[1], 10);
+    const unit = matches[2];
+
+    switch (unit) {
+      case "m":
+        expirationDate.setMinutes(expirationDate.getMinutes() + amount);
+        break;
+      case "h":
+        expirationDate.setHours(expirationDate.getHours() + amount);
+        break;
+      case "d":
+        expirationDate.setDate(expirationDate.getDate() + amount);
+        break;
+      default:
+        return false;
+    }
+
+    const now = new Date();
+    return now > expirationDate;
+  }
+
+  // For view-based expiration, we can't determine client-side
+  // This will need to be handled server-side
+  return false;
+}
 
 function formatExpiration(expiration: string | null): string {
   if (!expiration) return "soon";
@@ -48,8 +125,8 @@ function formatExpiration(expiration: string | null): string {
 
 export default function NotesPage() {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
   const { refreshFlag } = useNoteRefresh();
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,7 +135,7 @@ export default function NotesPage() {
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterType, setFilterType] = useState<
-    "all" | "time" | "view" | "password"
+    "all" | "time" | "view" | "password" | "expired" | "active"
   >("all");
 
   useEffect(() => {
@@ -86,53 +163,53 @@ export default function NotesPage() {
     }
   }, [isAuthenticated, refreshFlag]);
 
-  if (isLoading || loading) {
-    return (
-      <div className='flex min-h-screen items-center justify-center'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
-      </div>
-    );
-  }
+  // Calculate various stats for the notes
+  const activeNotes = notes.filter((note) => !isNoteExpired(note));
+  const expiredNotes = notes.filter((note) => isNoteExpired(note));
+  const passwordProtectedNotes = notes.filter(
+    (note) => note.passwordProtected
+  ).length;
+  const passwordProtectionRate =
+    notes.length > 0
+      ? Math.round((passwordProtectedNotes / notes.length) * 100)
+      : 0;
 
-  const handleDeleteNote = async (id: string) => {
-    try {
-      const response = await fetch(`/api/notes/${id}`, {
-        method: "DELETE",
-      });
+  // Using useMemo to optimize filtering and sorting
+  const filteredAndSortedNotes = useMemo(() => {
+    // First filter notes based on type selection
+    let filtered = notes;
 
-      if (response.ok) {
-        setNotes(notes.filter((note) => note.id !== id));
-      }
-    } catch (error) {
-      console.error("Error deleting note:", error);
+    switch (filterType) {
+      case "time":
+        filtered = notes.filter((note) => note.expirationType === "time");
+        break;
+      case "view":
+        filtered = notes.filter((note) => note.expirationType === "view");
+        break;
+      case "password":
+        filtered = notes.filter((note) => note.passwordProtected);
+        break;
+      case "expired":
+        filtered = expiredNotes;
+        break;
+      case "active":
+        filtered = activeNotes;
+        break;
     }
-  };
 
-  // Filter and sort notes
-  const filteredAndSortedNotes = notes
-    .filter((note) => {
-      // Filter by search term
+    // Then filter by search term
+    filtered = filtered.filter((note) => {
       if (
         searchTerm &&
         !note.title?.toLowerCase().includes(searchTerm.toLowerCase())
       ) {
         return false;
       }
-
-      // Filter by type
-      if (filterType === "time" && note.expirationType !== "time") {
-        return false;
-      }
-      if (filterType === "view" && note.expirationType !== "view") {
-        return false;
-      }
-      if (filterType === "password" && !note.passwordProtected) {
-        return false;
-      }
-
       return true;
-    })
-    .sort((a, b) => {
+    });
+
+    // Finally sort
+    return filtered.sort((a, b) => {
       // Sort by criteria
       if (sortBy === "created") {
         return sortOrder === "asc"
@@ -167,6 +244,37 @@ export default function NotesPage() {
 
       return 0;
     });
+  }, [
+    notes,
+    filterType,
+    activeNotes,
+    expiredNotes,
+    searchTerm,
+    sortOrder,
+    sortBy,
+  ]);
+
+  if (isLoading || loading) {
+    return (
+      <div className='flex min-h-screen items-center justify-center'>
+        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary'></div>
+      </div>
+    );
+  }
+
+  const handleDeleteNote = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setNotes(notes.filter((note) => note.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+  };
 
   return (
     <div className='flex min-h-screen flex-col items-center pt-8 px-4 pb-16 md:pt-16 md:px-8 md:pb-24 animate-in fade-in duration-500 bg-gradient-to-b from-background via-background/95 to-background/90'>
@@ -185,7 +293,7 @@ export default function NotesPage() {
             <Button
               asChild
               size='lg'
-              className='px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary'
+              className='px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary hover:scale-[1.02]'
             >
               <Link href='/create' className='flex items-center gap-2'>
                 <PlusCircle className='w-4 h-4' />
@@ -196,27 +304,15 @@ export default function NotesPage() {
         </div>
 
         {/* Search and filter controls */}
-        <div className='grid grid-cols-1 md:grid-cols-12 gap-4 animate-in slide-in-from-top-4 duration-700'>
+        <div className='grid grid-cols-1 md:grid-cols-12 gap-4 animate-in slide-in-from-top-4 duration-700 bg-card/30 backdrop-blur-sm p-4 rounded-xl border border-border/50 shadow-sm'>
           <div className='relative md:col-span-5'>
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                className='h-4 w-4 text-muted-foreground'
-              >
-                <circle cx='11' cy='11' r='8'></circle>
-                <path d='m21 21-4.3-4.3'></path>
-              </svg>
+              <Search className='h-4 w-4 text-muted-foreground' />
             </div>
             <input
               type='text'
               placeholder='Search notes...'
-              className='block w-full rounded-md border border-input bg-background px-10 py-2.5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+              className='block w-full rounded-lg border border-input/50 bg-background/50 px-10 py-2.5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -224,89 +320,118 @@ export default function NotesPage() {
               <div className='absolute inset-y-0 right-0 pr-3 flex items-center'>
                 <button
                   onClick={() => setSearchTerm("")}
-                  className='text-muted-foreground hover:text-foreground'
+                  className='text-muted-foreground hover:text-foreground rounded-full hover:bg-background/70 p-1 transition-colors'
                 >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    className='h-4 w-4'
-                  >
-                    <path d='M18 6 6 18'></path>
-                    <path d='m6 6 12 12'></path>
-                  </svg>
+                  <X className='h-3.5 w-3.5' />
                 </button>
               </div>
             )}
           </div>
 
-          <div className='flex space-x-2 md:col-span-7 justify-end'>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
-              className='rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-            >
-              <option value='all'>All Notes</option>
-              <option value='time'>Time-based Expiry</option>
-              <option value='view'>View-based Expiry</option>
-              <option value='password'>Password Protected</option>
-            </select>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className='rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
-            >
-              <option value='created'>Created Date</option>
-              <option value='title'>Title</option>
-              <option value='expiration'>Expiration</option>
-            </select>
-
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground h-10 w-10'
-              title={sortOrder === "asc" ? "Sort Descending" : "Sort Ascending"}
-            >
-              {sortOrder === "asc" ? (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  className='h-4 w-4'
+          <div className='flex flex-wrap gap-2 md:col-span-7 justify-end'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='h-10 gap-1.5 border-input/50 bg-background/50 hover:bg-background/80'
                 >
-                  <path d='m3 8 4-4 4 4'></path>
-                  <path d='M7 4v16'></path>
-                  <path d='M11 12h4'></path>
-                  <path d='M11 16h7'></path>
-                  <path d='M11 20h10'></path>
-                </svg>
-              ) : (
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  className='h-4 w-4'
+                  <Filter className='h-3.5 w-3.5' />
+                  <span>
+                    {filterType === "all"
+                      ? "All Notes"
+                      : filterType === "time"
+                      ? "Time-based"
+                      : filterType === "view"
+                      ? "View-based"
+                      : filterType === "password"
+                      ? "Password Protected"
+                      : filterType === "expired"
+                      ? "Expired Notes"
+                      : "Active Notes"}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align='end'
+                className='shadow-lg rounded-lg border-border/50'
+              >
+                <DropdownMenuItem
+                  onClick={() => setFilterType("all")}
+                  className='cursor-pointer'
                 >
-                  <path d='m3 16 4 4 4-4'></path>
-                  <path d='M7 20V4'></path>
-                  <path d='M11 4h10'></path>
-                  <path d='M11 8h7'></path>
-                  <path d='M11 12h4'></path>
-                </svg>
-              )}
-            </button>
+                  All Notes
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setFilterType("active")}
+                  className='cursor-pointer flex items-center gap-2'
+                >
+                  <span className='text-primary font-medium'>Active Notes</span>
+                  {activeNotes.length > 0 && (
+                    <span className='bg-primary/10 text-primary text-xs font-medium rounded-full px-2 py-0.5'>
+                      {activeNotes.length}
+                    </span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setFilterType("expired")}
+                  className='cursor-pointer flex items-center gap-2'
+                >
+                  <span className='text-destructive font-medium'>
+                    Expired Notes
+                  </span>
+                  {expiredNotes.length > 0 && (
+                    <span className='bg-destructive/10 text-destructive text-xs font-medium rounded-full px-2 py-0.5'>
+                      {expiredNotes.length}
+                    </span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setFilterType("time")}
+                  className='cursor-pointer'
+                >
+                  Time-based
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setFilterType("view")}
+                  className='cursor-pointer'
+                >
+                  View-based
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setFilterType("password")}
+                  className='cursor-pointer'
+                >
+                  Password Protected
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className='flex items-center gap-2 border border-input/50 bg-background/50 px-3 py-2 rounded-md text-sm h-10'>
+              <span className='text-muted-foreground text-xs'>Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className='bg-transparent border-none outline-none focus:ring-0 p-0 h-auto text-sm w-24'
+              >
+                <option value='created'>Created</option>
+                <option value='title'>Title</option>
+                <option value='expiration'>Expiration</option>
+              </select>
+
+              <button
+                onClick={() =>
+                  setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                }
+                className='inline-flex items-center justify-center rounded-md text-sm hover:bg-muted/50 p-1 transition-colors'
+                title={
+                  sortOrder === "asc" ? "Sort Descending" : "Sort Ascending"
+                }
+              >
+                <ArrowUpDown className='h-3.5 w-3.5' />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -316,24 +441,50 @@ export default function NotesPage() {
             filteredAndSortedNotes.map((note, index) => (
               <Card
                 key={note.id}
-                className='flex flex-col justify-between border group hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden animate-in slide-in-from-bottom-4 duration-700 h-full bg-card/50 backdrop-blur-sm relative'
+                className={`group relative overflow-hidden transition-all duration-300 hover:shadow-md dark:hover:shadow-primary/5 ${
+                  isNoteExpired(note)
+                    ? "border-destructive/30 bg-destructive/5 dark:bg-destructive/10"
+                    : "hover:border-primary/50 border-border/50 bg-card"
+                }`}
                 style={{ animationDelay: `${index * 75}ms` }}
               >
-                <div className='absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10'></div>
-                <div className='absolute right-0 top-0 h-16 w-16 bg-primary/10 rounded-bl-full -z-10 opacity-50'></div>
-                <CardHeader>
+                {isNoteExpired(note) && (
+                  <>
+                    <div className='absolute inset-0 bg-destructive/5 backdrop-blur-[1px] pointer-events-none z-0'></div>
+                    <div className='absolute -bottom-4 -right-4 text-destructive/10 font-bold rotate-12 text-8xl select-none pointer-events-none z-10'>
+                      EXPIRED
+                    </div>
+                  </>
+                )}
+                <CardHeader className='relative z-20'>
                   <div className='flex items-start justify-between'>
-                    <div className='space-y-1.5 min-w-0 flex-1 pr-2'>
-                      <CardTitle className='group-hover:text-primary transition-colors duration-300 flex items-center gap-2 max-w-full overflow-hidden'>
+                    <div className='space-y-1.5'>
+                      <CardTitle
+                        className={`group-hover:text-primary transition-colors duration-300 flex items-center gap-2 max-w-full overflow-hidden ${
+                          isNoteExpired(note) ? "text-muted-foreground" : ""
+                        }`}
+                      >
                         <span className='truncate inline-block max-w-[calc(100%-24px)]'>
                           {note.title || "Untitled Note"}
                         </span>
                         {note.passwordProtected && (
-                          <Shield className='h-4 w-4 text-primary flex-shrink-0' />
+                          <Shield
+                            className={`h-4 w-4 flex-shrink-0 ${
+                              isNoteExpired(note)
+                                ? "text-muted-foreground"
+                                : "text-primary"
+                            }`}
+                          />
                         )}
                       </CardTitle>
                       <CardDescription className='flex items-center gap-2 truncate'>
-                        <span className='inline-block w-2 h-2 rounded-full bg-primary/70 flex-shrink-0' />
+                        <span
+                          className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                            isNoteExpired(note)
+                              ? "bg-destructive/70"
+                              : "bg-primary/70"
+                          }`}
+                        />
                         <span
                           className='truncate'
                           title={formatDate(note.created)}
@@ -345,91 +496,160 @@ export default function NotesPage() {
                     <Button
                       variant='ghost'
                       size='icon'
-                      className='h-8 w-8 text-muted-foreground hover:text-destructive opacity-60 hover:opacity-100 transition-opacity'
+                      className='h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-60 hover:opacity-100 transition-all rounded-full'
                       onClick={() => handleDeleteNote(note.id)}
                     >
                       <span className='sr-only'>Delete</span>
-                      <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        className='h-4 w-4'
-                      >
-                        <path d='M3 6h18'></path>
-                        <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'></path>
-                        <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'></path>
-                      </svg>
+                      <Trash2 className='h-4 w-4' />
                     </Button>
                   </div>
+                  {isNoteExpired(note) && (
+                    <div className='absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs font-semibold px-2.5 py-1 rounded-full shadow-md border border-destructive/20 animate-pulse duration-[4000ms]'>
+                      Expired
+                    </div>
+                  )}
                 </CardHeader>
-                <CardContent>
+                <CardContent className='relative z-20'>
                   <div className='flex flex-col space-y-3 text-sm'>
-                    <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/60 backdrop-blur-sm'>
+                    <div
+                      className={`flex items-center gap-2 p-2.5 rounded-lg backdrop-blur-sm ${
+                        isNoteExpired(note)
+                          ? "bg-destructive/10"
+                          : "bg-muted/60"
+                      }`}
+                    >
                       {note.expirationType === "view" ? (
                         <>
-                          <Eye className='h-4 w-4 text-primary flex-shrink-0' />
+                          <Eye
+                            className={`h-4 w-4 flex-shrink-0 ${
+                              isNoteExpired(note)
+                                ? "text-destructive"
+                                : "text-primary"
+                            }`}
+                          />
                           <span className='truncate'>
-                            Expires after viewing
+                            {isNoteExpired(note)
+                              ? "Expired after viewing"
+                              : "Expires after viewing"}
                           </span>
                         </>
                       ) : (
                         <>
-                          <Clock className='h-4 w-4 text-primary flex-shrink-0' />
+                          <Clock
+                            className={`h-4 w-4 flex-shrink-0 ${
+                              isNoteExpired(note)
+                                ? "text-destructive"
+                                : "text-primary"
+                            }`}
+                          />
                           <span className='truncate'>
-                            Expires {formatExpiration(note.expiration)}
+                            {isNoteExpired(note)
+                              ? "Expired"
+                              : `Expires ${formatExpiration(note.expiration)}`}
                           </span>
                         </>
                       )}
                     </div>
                     {note.passwordProtected && (
-                      <div className='flex items-center gap-2 p-2.5 rounded-lg bg-muted/60 backdrop-blur-sm'>
-                        <Key className='h-4 w-4 text-primary flex-shrink-0' />
+                      <div
+                        className={`flex items-center gap-2 p-2.5 rounded-lg backdrop-blur-sm ${
+                          isNoteExpired(note)
+                            ? "bg-destructive/10"
+                            : "bg-muted/60"
+                        }`}
+                      >
+                        <Key
+                          className={`h-4 w-4 flex-shrink-0 ${
+                            isNoteExpired(note)
+                              ? "text-destructive"
+                              : "text-primary"
+                          }`}
+                        />
                         <span className='truncate'>Password protected</span>
+                      </div>
+                    )}
+                    {isNoteExpired(note) && (
+                      <div className='p-3 rounded-lg bg-destructive/15 border border-destructive/20'>
+                        <p className='text-center text-destructive text-xs font-medium'>
+                          This note has expired and cannot be viewed or edited
+                        </p>
                       </div>
                     )}
                   </div>
                 </CardContent>
-                <CardFooter className='flex justify-between gap-2 pt-4'>
+                <CardFooter className='flex justify-between gap-2 pt-4 relative z-20'>
                   <Button
-                    asChild
+                    asChild={!isNoteExpired(note)}
                     variant='outline'
-                    className='flex-1 transition-all duration-300 hover:bg-primary/5 border-primary/20'
+                    className={`flex-1 transition-all duration-300 ${
+                      isNoteExpired(note)
+                        ? "opacity-70 cursor-not-allowed bg-destructive/10 border-destructive/30 text-destructive/70"
+                        : "hover:bg-primary/5 border-primary/20 hover:border-primary/40"
+                    }`}
+                    disabled={isNoteExpired(note)}
                   >
-                    <Link
-                      href={`/view/${note.id}`}
-                      className='flex items-center justify-center gap-2'
-                    >
-                      <Eye className='w-4 h-4' />
-                      <span>View</span>
-                    </Link>
+                    {isNoteExpired(note) ? (
+                      <div className='flex items-center justify-center gap-2'>
+                        <Eye className='w-4 h-4' />
+                        <span>View</span>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/view/${note.id}`}
+                        className='flex items-center justify-center gap-2 w-full h-full'
+                      >
+                        <Eye className='w-4 h-4' />
+                        <span>View</span>
+                      </Link>
+                    )}
                   </Button>
                   <Button
-                    asChild
-                    className='flex-1 transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary/90 to-primary/80'
+                    asChild={!isNoteExpired(note)}
+                    className={`flex-1 transition-all duration-300 ${
+                      isNoteExpired(note)
+                        ? "opacity-70 cursor-not-allowed bg-destructive/10 text-destructive/70"
+                        : "hover:scale-[1.02] bg-gradient-to-r from-primary/90 to-primary/80 hover:shadow-md"
+                    }`}
+                    disabled={isNoteExpired(note)}
                   >
-                    <Link
-                      href={`/edit/${note.id}`}
-                      className='flex items-center justify-center gap-2'
-                    >
-                      <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        className='w-4 h-4'
+                    {isNoteExpired(note) ? (
+                      <div className='flex items-center justify-center gap-2'>
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          className='w-4 h-4'
+                        >
+                          <path d='M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'></path>
+                          <path d='m15 5 4 4'></path>
+                        </svg>
+                        <span>Edit</span>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/edit/${note.id}`}
+                        className='flex items-center justify-center gap-2 w-full h-full'
                       >
-                        <path d='M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'></path>
-                        <path d='m15 5 4 4'></path>
-                      </svg>
-                      <span>Edit</span>
-                    </Link>
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          className='w-4 h-4'
+                        >
+                          <path d='M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'></path>
+                          <path d='m15 5 4 4'></path>
+                        </svg>
+                        <span>Edit</span>
+                      </Link>
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
@@ -444,29 +664,16 @@ export default function NotesPage() {
               </CardHeader>
               <CardContent className='pt-4'>
                 <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    className='w-8 h-8 text-primary/60'
-                  >
-                    <circle cx='11' cy='11' r='8'></circle>
-                    <path d='m21 21-4.3-4.3'></path>
-                  </svg>
+                  <Search className='w-8 h-8 text-primary/60' />
                 </div>
                 <Button
                   variant='outline'
                   onClick={() => {
                     setSearchTerm("");
                     setFilterType("all");
-                    setSortBy("created");
                     setSortOrder("desc");
                   }}
-                  className='mt-2'
+                  className='mt-2 hover:border-primary/30 hover:text-primary transition-colors'
                 >
                   Clear filters
                 </Button>
@@ -475,7 +682,7 @@ export default function NotesPage() {
           ) : (
             <Card className='col-span-full p-8 text-center bg-gradient-to-br from-background to-muted/20 shadow-sm border-dashed border-2 animate-in fade-in zoom-in duration-500'>
               <CardHeader>
-                <CardTitle className='text-2xl'>
+                <CardTitle className='text-2xl bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent'>
                   Welcome to Secure Notes
                 </CardTitle>
                 <CardDescription className='text-lg mt-2'>
@@ -484,8 +691,8 @@ export default function NotesPage() {
               </CardHeader>
               <CardContent className='pt-4'>
                 <div className='max-w-md mx-auto'>
-                  <div className='w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center'>
-                    <PlusCircle className='w-10 h-10 text-primary/60' />
+                  <div className='w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-inner'>
+                    <PlusCircle className='w-10 h-10 text-primary/70' />
                   </div>
                   <p className='text-muted-foreground mb-8'>
                     Your notes are automatically encrypted and can be set to
@@ -498,7 +705,7 @@ export default function NotesPage() {
                 <Button
                   asChild
                   size='lg'
-                  className='px-8 py-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary'
+                  className='px-8 py-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary hover:scale-[1.02]'
                 >
                   <Link href='/create' className='flex items-center gap-2'>
                     <PlusCircle className='w-5 h-5' />
@@ -512,16 +719,16 @@ export default function NotesPage() {
 
         {/* Stats Section */}
         {notes.length > 0 && (
-          <div className='rounded-lg border bg-card/30 backdrop-blur-sm p-6 mt-8 relative overflow-hidden group hover:border-primary/20 transition-colors animate-in slide-in-from-bottom-4 duration-700 delay-300'>
-            <div className='absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+          <div className='rounded-xl border bg-card/30 backdrop-blur-sm p-6 mt-8 relative overflow-hidden group hover:border-primary/20 transition-colors animate-in slide-in-from-bottom-4 duration-700 delay-300 shadow-sm'>
+            <div className='absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
             <div className='flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10'>
               <div className='space-y-2'>
                 <h3 className='text-xl font-medium bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
                   Note Statistics
                 </h3>
                 <p className='text-sm text-muted-foreground'>
-                  You have {notes.length} secure note
-                  {notes.length !== 1 ? "s" : ""} in your account
+                  You have {notes.length} total notes in your account (
+                  {activeNotes.length} active, {expiredNotes.length} expired)
                 </p>
               </div>
               <div className='flex flex-wrap items-center gap-2'>
@@ -580,8 +787,8 @@ export default function NotesPage() {
                     ></rect>
                     <path d='M7 11V7a5 5 0 0 1 10 0v4'></path>
                   </svg>
-                  {notes.filter((n) => n.passwordProtected).length} password
-                  protected
+                  {passwordProtectedNotes} password protected (
+                  {passwordProtectionRate}%)
                 </div>
               </div>
             </div>

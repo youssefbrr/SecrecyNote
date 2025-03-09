@@ -24,6 +24,8 @@ import {
   Loader2,
   LockIcon,
   ScrollText,
+  Text,
+  UnlockIcon,
   User,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,26 +44,40 @@ export default function AccountPage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [stats, setStats] = useState<{
     totalNotes: number;
+    activeNotes: number;
+    expiredNotes: number;
     memberSince: string | null;
     lastActivity: string | null;
     accountUpdated: string | null;
     passwordProtectedNotes: number;
+    passwordProtectionRate: number;
     expirationDistribution: Record<string, number>;
     recentNotesCount: number;
+    avgContentLength: number;
+    maxContentLength: number;
     latestNotes: Array<{
       id: string;
       title: string;
       created: string;
+      updated: string;
       isPasswordProtected: boolean;
+      isExpired: boolean;
+      expirationType: string;
+      contentLength: number;
     }>;
   }>({
     totalNotes: 0,
+    activeNotes: 0,
+    expiredNotes: 0,
     memberSince: null,
     lastActivity: null,
     accountUpdated: null,
     passwordProtectedNotes: 0,
+    passwordProtectionRate: 0,
     expirationDistribution: {},
     recentNotesCount: 0,
+    avgContentLength: 0,
+    maxContentLength: 0,
     latestNotes: [],
   });
   const [loadingStats, setLoadingStats] = useState(true);
@@ -435,6 +451,10 @@ export default function AccountPage() {
                       <div>
                         <p className='text-sm font-medium'>Total Notes</p>
                         <p className='text-2xl font-bold'>{stats.totalNotes}</p>
+                        <p className='text-xs text-muted-foreground'>
+                          {stats.activeNotes} active, {stats.expiredNotes}{" "}
+                          expired
+                        </p>
                       </div>
                     </div>
 
@@ -506,13 +526,7 @@ export default function AccountPage() {
                           <div>
                             <p className='text-sm'>Protection Rate</p>
                             <p className='text-xl font-bold'>
-                              {stats.totalNotes > 0
-                                ? Math.round(
-                                    (stats.passwordProtectedNotes /
-                                      stats.totalNotes) *
-                                      100
-                                  ) + "%"
-                                : "0%"}
+                              {stats.passwordProtectionRate}%
                             </p>
                           </div>
                         </div>
@@ -532,6 +546,28 @@ export default function AccountPage() {
                     </div>
                   </div>
 
+                  {/* Add content length stats */}
+                  <div className='p-4 border rounded-md mt-4'>
+                    <div className='flex items-center mb-2'>
+                      <Text className='h-4 w-4 mr-2 text-primary' />
+                      <h4 className='font-medium'>Content Statistics</h4>
+                    </div>
+                    <div className='flex justify-between mt-3'>
+                      <div>
+                        <p className='text-sm'>Avg. Length</p>
+                        <p className='text-xl font-bold'>
+                          {stats.avgContentLength} chars
+                        </p>
+                      </div>
+                      <div>
+                        <p className='text-sm'>Max Length</p>
+                        <p className='text-xl font-bold'>
+                          {stats.maxContentLength} chars
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Latest Notes */}
                   {stats.latestNotes.length > 0 && (
                     <div>
@@ -539,8 +575,10 @@ export default function AccountPage() {
                       <div className='border rounded-md overflow-hidden'>
                         <div className='bg-muted px-4 py-2'>
                           <div className='grid grid-cols-12 gap-2 text-sm font-medium'>
-                            <div className='col-span-7'>Title</div>
-                            <div className='col-span-3'>Created</div>
+                            <div className='col-span-5'>Title</div>
+                            <div className='col-span-2'>Created</div>
+                            <div className='col-span-1'>Length</div>
+                            <div className='col-span-2'>Status</div>
                             <div className='col-span-2'>Security</div>
                           </div>
                         </div>
@@ -550,7 +588,7 @@ export default function AccountPage() {
                               key={note.id}
                               className='grid grid-cols-12 gap-2 px-4 py-3 text-sm'
                             >
-                              <div className='col-span-7 font-medium truncate'>
+                              <div className='col-span-5 font-medium truncate'>
                                 <Link
                                   href={`/view/${note.id}`}
                                   className='hover:text-primary transition-colors flex items-center'
@@ -559,18 +597,35 @@ export default function AccountPage() {
                                   {note.title}
                                 </Link>
                               </div>
-                              <div className='col-span-3 text-muted-foreground'>
+                              <div className='col-span-2 text-muted-foreground'>
                                 {new Date(note.created).toLocaleDateString()}
+                              </div>
+                              <div className='col-span-1 text-muted-foreground'>
+                                {note.contentLength}
+                              </div>
+                              <div className='col-span-2'>
+                                {note.isExpired ? (
+                                  <span className='inline-flex items-center rounded-full bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive'>
+                                    Expired
+                                  </span>
+                                ) : (
+                                  <span className='inline-flex items-center rounded-full bg-green-100 dark:bg-green-500/20 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400'>
+                                    Active
+                                  </span>
+                                )}
                               </div>
                               <div className='col-span-2'>
                                 {note.isPasswordProtected ? (
-                                  <span className='inline-flex items-center text-amber-600 dark:text-amber-500'>
-                                    <LockIcon className='h-3 w-3 mr-1' />
-                                    <span>Protected</span>
+                                  <span className='inline-flex items-center'>
+                                    <LockIcon className='h-3.5 w-3.5 mr-1 text-amber-500' />
+                                    <span className='text-xs'>Protected</span>
                                   </span>
                                 ) : (
-                                  <span className='text-muted-foreground'>
-                                    None
+                                  <span className='inline-flex items-center'>
+                                    <UnlockIcon className='h-3.5 w-3.5 mr-1 text-muted-foreground' />
+                                    <span className='text-xs text-muted-foreground'>
+                                      Open
+                                    </span>
                                   </span>
                                 )}
                               </div>
