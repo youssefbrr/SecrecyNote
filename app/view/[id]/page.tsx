@@ -272,6 +272,9 @@ export default function ViewNote({ params }: { params: { id: string } }) {
           <Button onClick={handleBack} variant='outline'>
             Back to Notes
           </Button>
+          <Button onClick={() => router.push("/create")} variant='default'>
+            Create Secure Note
+          </Button>
         </CardFooter>
       </Card>
     </div>
