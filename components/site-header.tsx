@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthModal } from "@/components/auth/auth-modal";
 import { useAuth } from "@/components/providers/auth-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,6 +31,7 @@ import { useEffect, useState } from "react";
 export function SiteHeader() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
   const [showAuthOptions, setShowAuthOptions] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -175,15 +177,19 @@ export function SiteHeader() {
             </div>
           ) : (
             <div className='flex items-center gap-2'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => setShowAuthOptions(true)}
-                className='border-primary/20 hover:bg-primary/5 hover-lift-sm'
-              >
-                <User className='h-4 w-4 mr-1.5' />
-                <span>Login</span>
-              </Button>
+              <AuthModal
+                trigger={
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='border-primary/20 hover:bg-primary/5 hover-lift-sm'
+                  >
+                    <User className='h-4 w-4 mr-1.5' />
+                    <span>Login</span>
+                  </Button>
+                }
+                onOpenChange={setShowAuthModal}
+              />
               <Button
                 asChild
                 variant='default'
