@@ -58,44 +58,54 @@ export default function Home() {
       <main className='flex-1 w-full max-w-6xl mx-auto px-4 pt-8 pb-16 md:pt-12 md:px-8 md:pb-20 animate-in fade-in duration-700'>
         {/* Hero Section */}
         <section className='relative mb-16 animate-in slide-in-from-top-4 duration-700 delay-100'>
-          <div className='absolute -inset-x-20 -top-20 h-40 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent blur-3xl -z-10 rounded-full opacity-60'></div>
+          <div className='absolute -inset-x-20 -top-20 h-40 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent blur-3xl -z-10 rounded-full opacity-60 animate-pulse-subtle'></div>
 
           <div className='flex flex-col md:flex-row gap-8 items-center justify-between'>
-            <div className='max-w-xl space-y-4'>
-              <h2 className='text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent'>
-                SecrecyNote: Private Messages that Self-Destruct
+            <div className='max-w-xl space-y-4 animate-fade-in'>
+              <h2
+                className='text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent animate-slide-up'
+                style={{ animationDelay: "0.05s" }}
+              >
+                Secure Notes, Simplified
               </h2>
               <p className='text-lg text-muted-foreground max-w-md'>
-                Create encrypted notes that only the recipient can access, and
-                automatically delete after viewing.
+                Create secure, encrypted notes that automatically delete after
+                viewing.
               </p>
 
-              <div className='flex flex-wrap items-center gap-2 pt-2'>
-                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20'>
+              <div
+                className='flex flex-wrap items-center gap-2 pt-2 animate-slide-up'
+                style={{ animationDelay: "0.1s" }}
+              >
+                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20 hover-lift-sm'>
                   End-to-end encryption
                 </span>
-                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20'>
+                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20 hover-lift-sm'>
                   No tracking
                 </span>
-                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20'>
+                <span className='inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-primary/10 text-primary hover:bg-primary/20 hover-lift-sm'>
                   Zero knowledge
                 </span>
               </div>
 
-              <div className='flex flex-wrap gap-3 pt-4'>
+              <div
+                className='flex flex-wrap gap-3 pt-4 animate-slide-up'
+                style={{ animationDelay: "0.2s" }}
+              >
                 <Button
                   asChild
-                  className='bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary font-medium h-11 px-6 transition-all duration-300'
+                  variant='gradient'
+                  className='font-medium h-11 px-6 transition-all duration-300 hover-lift'
                 >
-                  <Link href='/create'>
-                    <PlusCircle className='h-4 w-4 mr-2' />
+                  <Link href='/create?guest=true'>
+                    <PlusCircle className='h-4 w-4 mr-2 animate-pulse-subtle' />
                     Create Secure Note
                   </Link>
                 </Button>
                 <Button
                   asChild
                   variant='outline'
-                  className='border-primary/20 hover:bg-primary/5 h-11 px-6'
+                  className='border-primary/20 hover:bg-primary/5 h-11 px-6 hover-lift'
                 >
                   <Link href='/view'>
                     <Eye className='h-4 w-4 mr-2' />
@@ -105,8 +115,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className='relative max-w-md w-full'>
-              <div className='absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-2xl blur-md -z-10'></div>
+            <div
+              className='relative max-w-md w-full animate-scale'
+              style={{ animationDelay: "0.3s" }}
+            >
+              <div className='absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/20 to-transparent rounded-2xl blur-md -z-10 animate-pulse-subtle'></div>
               <div className='rounded-2xl border border-primary/20 shadow-lg overflow-hidden bg-card/50 backdrop-blur-lg p-6'>
                 <div className='flex items-center justify-between mb-4'>
                   <div className='flex items-center gap-2'>
@@ -248,7 +261,7 @@ export default function Home() {
                           size='lg'
                         >
                           <Link
-                            href='/create'
+                            href='/create?guest=true'
                             className='flex items-center gap-2'
                           >
                             <PlusCircle className='h-4 w-4' />
@@ -512,7 +525,7 @@ export default function Home() {
 
         {/* Features Section */}
         <section className='mt-16 animate-in slide-in-from-bottom-4 duration-700 delay-300'>
-          <div className='text-center mb-10'>
+          <div className='text-center mb-10 animate-fade-in'>
             <h2 className='text-2xl md:text-3xl font-bold tracking-tight'>
               Why Choose SecrecyNote?
             </h2>
@@ -523,9 +536,12 @@ export default function Home() {
           </div>
 
           <div className='grid md:grid-cols-3 gap-6'>
-            <Card className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20'>
+            <Card
+              className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20 hover-lift animate-scale'
+              style={{ animationDelay: "0.1s" }}
+            >
               <CardHeader>
-                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2'>
+                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 animate-pulse-subtle'>
                   <Lock className='h-6 w-6 text-primary' />
                 </div>
                 <CardTitle className='text-xl'>End-to-End Encryption</CardTitle>
@@ -536,9 +552,12 @@ export default function Home() {
               </CardHeader>
             </Card>
 
-            <Card className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20'>
+            <Card
+              className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20 hover-lift animate-scale'
+              style={{ animationDelay: "0.2s" }}
+            >
               <CardHeader>
-                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2'>
+                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 animate-pulse-subtle'>
                   <Eye className='h-6 w-6 text-primary' />
                 </div>
                 <CardTitle className='text-xl'>
@@ -551,9 +570,12 @@ export default function Home() {
               </CardHeader>
             </Card>
 
-            <Card className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20'>
+            <Card
+              className='border-primary/10 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/20 hover-lift animate-scale'
+              style={{ animationDelay: "0.3s" }}
+            >
               <CardHeader>
-                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2'>
+                <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 animate-pulse-subtle'>
                   <CheckCircle className='h-6 w-6 text-primary' />
                 </div>
                 <CardTitle className='text-xl'>Zero Knowledge</CardTitle>
@@ -567,8 +589,8 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className='rounded-lg border bg-card/30 backdrop-blur-sm p-6 md:p-8 mt-16 relative overflow-hidden group hover:border-primary/20 transition-colors animate-in slide-in-from-bottom-4 duration-700 delay-400'>
-          <div className='absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+        <section className='rounded-lg border bg-card/30 backdrop-blur-sm p-6 md:p-8 mt-16 relative overflow-hidden group hover:border-primary/20 transition-colors animate-in slide-in-from-bottom-4 duration-700 delay-400 hover-lift'>
+          <div className='absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500'></div>
           <div className='flex flex-col md:flex-row items-center justify-between gap-6 relative z-10'>
             <div className='space-y-2 text-center md:text-left'>
               <h3 className='text-2xl font-medium bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
@@ -582,11 +604,12 @@ export default function Home() {
             <Button
               asChild
               size='lg'
-              className='bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary font-medium transition-all duration-300 hover:scale-[1.02] px-8'
+              variant='gradient'
+              className='font-medium transition-all duration-300 hover-lift px-8'
             >
               <Link href='/create' className='flex items-center gap-2'>
                 <span>Try SecrecyNote Now</span>
-                <ArrowRight className='h-4 w-4' />
+                <ArrowRight className='h-4 w-4 animate-pulse-subtle' />
               </Link>
             </Button>
           </div>
