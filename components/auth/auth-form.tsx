@@ -16,7 +16,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-export function AuthForm() {
+interface AuthFormProps {
+  onSuccess?: () => void;
+}
+
+export function AuthForm({ onSuccess }: AuthFormProps) {
   const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +41,9 @@ export function AuthForm() {
 
     try {
       const success = await login(loginEmail, loginPassword);
-      if (!success) {
+      if (success) {
+        onSuccess?.();
+      } else {
         setError("Invalid email or password");
       }
     } catch (error) {
@@ -58,7 +64,9 @@ export function AuthForm() {
         registerPassword,
         registerName
       );
-      if (!success) {
+      if (success) {
+        onSuccess?.();
+      } else {
         setError("Registration failed. Email may already be in use.");
       }
     } catch (error) {
