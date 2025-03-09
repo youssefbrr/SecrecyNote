@@ -47,10 +47,10 @@ export function AuthModal({
       <DialogContent className='sm:max-w-md md:max-w-lg'>
         <DialogHeader>
           <DialogTitle className='text-xl font-bold'>
-            Account Access
+            SecrecyNote Account
           </DialogTitle>
           <DialogDescription>
-            Sign in or create an account to unlock all features.
+            Sign in or create an account to unlock all SecrecyNote features.
           </DialogDescription>
         </DialogHeader>
 

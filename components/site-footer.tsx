@@ -13,7 +13,7 @@ export function SiteFooter() {
               <div className='h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center'>
                 <Lock className='h-4 w-4 text-primary' />
               </div>
-              <span className='font-medium text-lg'>Secure Notes</span>
+              <span className='font-medium text-lg'>SecrecyNote</span>
             </div>
             <p className='text-sm text-muted-foreground max-w-xs'>
               Create encrypted, self-destructing notes with end-to-end security
@@ -179,7 +179,7 @@ export function SiteFooter() {
 
         <div className='pt-6 border-t border-border/30 flex flex-col md:flex-row justify-between items-center gap-4'>
           <div className='text-xs text-muted-foreground'>
-            © {new Date().getFullYear()} Secure Notes. All rights reserved.
+            © {new Date().getFullYear()} SecrecyNote. All rights reserved.
           </div>
           <div className='flex items-center gap-4'>
             <Link

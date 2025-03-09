@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Secure Notes - Private & Encrypted Notes",
+  title: "SecrecyNote - Private & Encrypted Notes",
   description:
     "Create, view, and manage private, encrypted notes that self-destruct",
   manifest: "/manifest.json",
@@ -32,21 +32,21 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Secure Notes",
+    title: "SecrecyNote",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "Secure Notes",
-    title: "Secure Notes - Private & Encrypted Notes",
+    siteName: "SecrecyNote",
+    title: "SecrecyNote - Private & Encrypted Notes",
     description:
       "Create, view, and manage private, encrypted notes that self-destruct",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Secure Notes",
+    title: "SecrecyNote",
     description:
       "Create, view, and manage private, encrypted notes that self-destruct",
   },

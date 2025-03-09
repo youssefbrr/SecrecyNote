@@ -69,7 +69,7 @@ export function SiteHeader() {
             </div>
           </div>
           <h1 className='text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent'>
-            Secure Notes
+            SecrecyNote
           </h1>
         </Link>
 

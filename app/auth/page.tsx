@@ -42,7 +42,7 @@ export default function AuthPage() {
             </Link>
 
             <h1 className='text-3xl font-bold mt-6 mb-2'>
-              Welcome to Secure Notes
+              Welcome to SecrecyNote
             </h1>
             <p className='text-muted-foreground'>
               Sign in or create an account to access your encrypted notes

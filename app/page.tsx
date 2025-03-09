@@ -63,7 +63,7 @@ export default function Home() {
           <div className='flex flex-col md:flex-row gap-8 items-center justify-between'>
             <div className='max-w-xl space-y-4'>
               <h2 className='text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent'>
-                Secure, Private Notes that Self-Destruct
+                SecrecyNote: Private Messages that Self-Destruct
               </h2>
               <p className='text-lg text-muted-foreground max-w-md'>
                 Create encrypted notes that only the recipient can access, and
@@ -135,7 +135,7 @@ export default function Home() {
         <section className='mt-24 mb-24 animate-in slide-in-from-bottom-4 duration-700 delay-200'>
           <div className='text-center mb-16'>
             <h2 className='text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent'>
-              Choose Your Secure Path
+              Choose Your SecrecyNote Path
             </h2>
             <p className='text-muted-foreground mt-3 max-w-2xl mx-auto text-lg'>
               Whether you need a permanent solution or a quick secure note,
@@ -161,12 +161,12 @@ export default function Home() {
                   <h3 className='text-2xl md:text-3xl font-bold leading-tight'>
                     {isAuthenticated
                       ? `Welcome back, ${user?.name || "User"}!`
-                      : "Unlock Enhanced Security Features"}
+                      : "Unlock Enhanced SecrecyNote Features"}
                   </h3>
 
                   <p className='text-muted-foreground text-lg'>
                     {isAuthenticated
-                      ? "Your secure dashboard is ready. Access and manage all your encrypted notes in one place."
+                      ? "Your SecrecyNote dashboard is ready. Access and manage all your encrypted notes in one place."
                       : "Create an account to access advanced features, track note history, and manage all your secure communications."}
                   </p>
 
@@ -265,7 +265,8 @@ export default function Home() {
                         href='/auth'
                         className='hover:text-primary hover:underline transition-colors'
                       >
-                        Prefer a full page experience? Sign in here
+                        Prefer a full page experience? Sign in to SecrecyNote
+                        here
                       </Link>
                     </div>
                   )}
@@ -283,7 +284,9 @@ export default function Home() {
                             <User className='h-5 w-5 text-primary' />
                           </div>
                           <div>
-                            <h4 className='font-medium'>Secure Dashboard</h4>
+                            <h4 className='font-medium'>
+                              SecrecyNote Dashboard
+                            </h4>
                             <p className='text-xs text-muted-foreground'>
                               All your notes in one place
                             </p>
@@ -370,7 +373,7 @@ export default function Home() {
                         <div className='flex items-center gap-2'>
                           <Lock className='h-4 w-4 text-primary' />
                           <span className='text-sm font-medium'>
-                            New Secure Note
+                            New SecrecyNote
                           </span>
                         </div>
                         <div className='text-xs px-2 py-1 bg-primary/20 rounded-full text-primary'>
@@ -438,7 +441,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h4 className='font-medium text-lg group-hover:text-primary transition-colors'>
-                          Instant Secure Notes
+                          Instant SecrecyNotes
                         </h4>
                         <p className='text-muted-foreground'>
                           Create encrypted notes in seconds with zero setup or
@@ -511,7 +514,7 @@ export default function Home() {
         <section className='mt-16 animate-in slide-in-from-bottom-4 duration-700 delay-300'>
           <div className='text-center mb-10'>
             <h2 className='text-2xl md:text-3xl font-bold tracking-tight'>
-              Why Choose Secure Notes?
+              Why Choose SecrecyNote?
             </h2>
             <p className='text-muted-foreground mt-2 max-w-lg mx-auto'>
               Our platform prioritizes your privacy with industry-leading
@@ -569,7 +572,7 @@ export default function Home() {
           <div className='flex flex-col md:flex-row items-center justify-between gap-6 relative z-10'>
             <div className='space-y-2 text-center md:text-left'>
               <h3 className='text-2xl font-medium bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent'>
-                Ready to secure your private information?
+                Ready to secure your private information with SecrecyNote?
               </h3>
               <p className='text-muted-foreground max-w-lg'>
                 Start creating encrypted, self-destructing notes today - no
@@ -582,7 +585,7 @@ export default function Home() {
               className='bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary font-medium transition-all duration-300 hover:scale-[1.02] px-8'
             >
               <Link href='/create' className='flex items-center gap-2'>
-                <span>Get Started</span>
+                <span>Try SecrecyNote Now</span>
                 <ArrowRight className='h-4 w-4' />
               </Link>
             </Button>
