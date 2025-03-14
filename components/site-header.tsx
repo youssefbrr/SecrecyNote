@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  CheckCircle,
   FileText,
   Lock,
   LogOut,
@@ -135,6 +136,16 @@ export function SiteHeader() {
 
                     <DropdownMenuItem asChild>
                       <Link
+                        href='/features'
+                        className='cursor-pointer w-full flex items-center transition-colors hover:bg-primary/5'
+                      >
+                        <CheckCircle className='mr-2 h-4 w-4' />
+                        <span>Features</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link
                         href='/account'
                         className='cursor-pointer w-full flex items-center transition-colors hover:bg-primary/5'
                       >
@@ -177,6 +188,17 @@ export function SiteHeader() {
             </div>
           ) : (
             <div className='flex items-center gap-2'>
+              <Button
+                asChild
+                variant='ghost'
+                size='sm'
+                className='hover:bg-primary/5 hover-lift-sm'
+              >
+                <Link href='/features'>
+                  <CheckCircle className='h-4 w-4 mr-1.5' />
+                  <span>Features</span>
+                </Link>
+              </Button>
               <AuthModal
                 trigger={
                   <Button
