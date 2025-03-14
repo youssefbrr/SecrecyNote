@@ -112,6 +112,16 @@ export default function Home() {
                     View Secure Note
                   </Link>
                 </Button>
+                <Button
+                  asChild
+                  variant='ghost'
+                  className='hover:bg-primary/5 h-11 px-6 hover-lift'
+                >
+                  <Link href='/features'>
+                    <ArrowRight className='h-4 w-4 mr-2' />
+                    Learn More
+                  </Link>
+                </Button>
               </div>
             </div>
 
@@ -154,6 +164,18 @@ export default function Home() {
               Whether you need a permanent solution or a quick secure note,
               we've got you covered
             </p>
+            <div className='mt-6'>
+              <Button
+                asChild
+                variant='outline'
+                className='border-primary/20 hover:bg-primary/5 h-10 px-5 hover-lift-sm'
+              >
+                <Link href='/features'>
+                  <ArrowRight className='h-4 w-4 mr-2' />
+                  Explore All Features
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {/* Account Access Section */}
