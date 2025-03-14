@@ -1,6 +1,15 @@
 "use client";
 
-import { Lock } from "lucide-react";
+import {
+  CheckCircle,
+  ExternalLink,
+  Eye,
+  FileText,
+  Lock,
+  PlusCircle,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -9,11 +18,16 @@ export function SiteFooter() {
       <div className='max-w-6xl mx-auto'>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-8 mb-8'>
           <div className='col-span-2 md:col-span-1'>
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                <Lock className='h-4 w-4 text-primary' />
+            <div className='flex items-center gap-2 mb-4 group hover-lift-sm'>
+              <div className='relative'>
+                <div className='absolute -inset-1 rounded-full blur-sm bg-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+                <div className='h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center relative transition-colors duration-300 group-hover:bg-primary/20'>
+                  <Lock className='h-5 w-5 text-primary animate-pulse-subtle' />
+                </div>
               </div>
-              <span className='font-medium text-lg'>SecrecyNote</span>
+              <span className='text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent transition-all duration-300'>
+                SecrecyNote
+              </span>
             </div>
             <p className='text-sm text-muted-foreground max-w-xs'>
               Create encrypted, self-destructing notes with end-to-end security
@@ -24,7 +38,8 @@ export function SiteFooter() {
                 href='https://twitter.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-muted-foreground hover:text-primary transition-colors'
+                className='text-muted-foreground hover:text-primary transition-colors hover-lift-sm'
+                aria-label='Twitter'
               >
                 <svg
                   className='h-5 w-5'
@@ -43,7 +58,8 @@ export function SiteFooter() {
                 href='https://github.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='text-muted-foreground hover:text-primary transition-colors'
+                className='text-muted-foreground hover:text-primary transition-colors hover-lift-sm'
+                aria-label='GitHub'
               >
                 <svg
                   className='h-5 w-5'
@@ -63,143 +79,149 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className='font-semibold mb-3 text-sm'>Product</h3>
+            <h3 className='font-semibold mb-3 text-sm px-2 py-1 bg-primary/10 text-primary rounded-full inline-block'>
+              Main
+            </h3>
             <ul className='space-y-2'>
+              <li>
+                <Link
+                  href='/'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
+                >
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <Lock className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>Home</span>
+                </Link>
+              </li>
               <li>
                 <Link
                   href='/features'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Features
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <CheckCircle className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>Features</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href='/security'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/auth'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href='/pricing'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
-                >
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href='/faq'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
-                >
-                  FAQ
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <User className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>Login / Register</span>
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className='font-semibold mb-3 text-sm'>Resources</h3>
+            <h3 className='font-semibold mb-3 text-sm px-2 py-1 bg-primary/10 text-primary rounded-full inline-block'>
+              Actions
+            </h3>
             <ul className='space-y-2'>
               <li>
                 <Link
-                  href='/help'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/create'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Help Center
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <PlusCircle className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>Create Note</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href='/guides'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/view'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Guides
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <Eye className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>View Note</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href='/blog'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/notes'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href='/status'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
-                >
-                  Status
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <FileText className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>My Notes</span>
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className='font-semibold mb-3 text-sm'>Company</h3>
+            <h3 className='font-semibold mb-3 text-sm px-2 py-1 bg-primary/10 text-primary rounded-full inline-block'>
+              Security
+            </h3>
             <ul className='space-y-2'>
               <li>
                 <Link
-                  href='/about'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/account'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  About
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <User className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>My Account</span>
                 </Link>
               </li>
               <li>
                 <Link
-                  href='/privacy'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                  href='/features#security'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Privacy
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <ShieldCheck className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>Security Features</span>
                 </Link>
               </li>
               <li>
-                <Link
-                  href='/terms'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
+                <a
+                  href='https://github.com'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-sm flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group'
                 >
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href='/contact'
-                  className='text-sm text-muted-foreground hover:text-primary transition-colors'
-                >
-                  Contact
-                </Link>
+                  <div className='h-6 w-6 rounded-full bg-background flex items-center justify-center group-hover:bg-primary/10 transition-colors'>
+                    <ExternalLink className='h-3.5 w-3.5 text-primary' />
+                  </div>
+                  <span>GitHub Repo</span>
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className='pt-6 border-t border-border/30 flex flex-col md:flex-row justify-between items-center gap-4'>
-          <div className='text-xs text-muted-foreground'>
-            © {new Date().getFullYear()} SecrecyNote. All rights reserved.
-          </div>
-          <div className='flex items-center gap-4'>
-            <Link
-              href='/privacy'
-              className='text-xs text-muted-foreground hover:text-primary transition-colors'
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href='/terms'
-              className='text-xs text-muted-foreground hover:text-primary transition-colors'
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href='/cookies'
-              className='text-xs text-muted-foreground hover:text-primary transition-colors'
-            >
-              Cookies
-            </Link>
+        <div className='relative'>
+          <div className='absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 -z-10'></div>
+          <div className='pt-6 border-t border-border/30 flex flex-col md:flex-row justify-between items-center gap-4 relative'>
+            <div className='text-xs text-muted-foreground'>
+              © {new Date().getFullYear()} SecrecyNote. All rights reserved.
+            </div>
+            <div className='flex flex-wrap items-center justify-center gap-4'>
+              <p className='text-xs text-muted-foreground'>
+                Made with encryption and privacy in mind.
+              </p>
+              <div className='h-1 w-1 rounded-full bg-primary/20'></div>
+              <Link
+                href='/features'
+                className='text-xs text-muted-foreground hover:text-primary transition-colors'
+              >
+                Learn about our security
+              </Link>
+            </div>
           </div>
         </div>
       </div>
