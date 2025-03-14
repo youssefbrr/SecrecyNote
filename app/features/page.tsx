@@ -51,7 +51,10 @@ export default function FeaturesPage() {
         </section>
 
         {/* Core Features Section */}
-        <section className='mb-24 animate-in slide-in-from-bottom-4 duration-700 delay-200'>
+        <section
+          id='security'
+          className='mb-24 animate-in slide-in-from-bottom-4 duration-700 delay-200'
+        >
           <div className='text-center mb-16'>
             <h2 className='text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent'>
               Core Security Features
